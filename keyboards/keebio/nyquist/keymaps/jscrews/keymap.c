@@ -26,6 +26,9 @@ enum custom_keycodes {
   RAISE,
   ADJUST,
   SHIFT_ENTER,
+  COPY,
+  PASTE,
+  TERM,
 };
 
 enum {
@@ -136,9 +139,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 [_ADJUST] = LAYOUT( \
   KC_F12,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11, \
+  _______, _______, _______, _______, _______, TERM,    _______, _______, _______, _______, _______, _______, \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
-  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
-  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, TD(TD_RESET), \
+  _______, _______, _______, COPY,    PASTE,   _______, _______, _______, _______, _______, _______, TD(TD_RESET), \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______  \
 ),
 
@@ -212,6 +215,24 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
           }
           shiftOn = false;
           shiftUsed = false;
+      }
+      return false;
+      break;
+    case COPY:
+      if (record->event.pressed) {
+          send_string(SS_LCTL(SS_LSFT("c")));
+      }
+      return false;
+      break;
+    case PASTE:
+      if (record->event.pressed) {
+          send_string(SS_LCTL(SS_LSFT("v")));
+      }
+      return false;
+      break;
+    case TERM:
+      if (record->event.pressed) {
+          send_string(SS_LCTL(SS_LALT("t")));
       }
       return false;
       break;
