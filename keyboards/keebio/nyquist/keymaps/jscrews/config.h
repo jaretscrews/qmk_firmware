@@ -32,3 +32,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Tapping
 #define TAPPING_TERM 200
+
+// Disable some rgb stuff to save space
+#define DISABLE_RGB_MATRIX_RAINBOW_BEACON	
+#define DISABLE_RGB_MATRIX_RAINBOW_PINWHEELS
+#define DISABLE_RGB_MATRIX_CYCLE_ALL
+#define DISABLE_RGB_MATRIX_JELLYBEAN_RAINDROPS
+#define DISABLE_RGB_MATRIX_TYPING_HEATMAP
+#define NO_ACTION_MACRO
+#define NO_ACTION_FUNCTION
