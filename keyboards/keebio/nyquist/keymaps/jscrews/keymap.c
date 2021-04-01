@@ -1,7 +1,12 @@
+#include "action_layer.h"
+#include "config.h"
+#include "rgblight_list.h"
 #include QMK_KEYBOARD_H
 #include "keycode.h"
 #include "process_tap_dance.h"
 #include "quantum_keycodes.h"
+#include "rgblight.h"
+#include "rgblight_modes.h"
 
 
 // Each layer gets a name for readability, which is then used in the keymap matrix below.
@@ -22,8 +27,9 @@ enum custom_keycodes {
 };
 
 enum {
-    TD_CTRL_CAPS,
+    TD_CTRL_ESC,
     TD_RESET,
+    TD_UNDERGLOW,
 };
 
 void safe_reset(qk_tap_dance_state_t *state, void *user_data) {
@@ -33,11 +39,18 @@ void safe_reset(qk_tap_dance_state_t *state, void *user_data) {
     }
 }
 
+void tap_rgb(qk_tap_dance_state_t *state, void *user_data) {
+    if (state->count == 1) rgblight_toggle();
+    else if (state->count > 1) rgblight_step();
+}
+
+
 qk_tap_dance_action_t tap_dance_actions[] = {
     // Tap once for ctrl twice for caps lock
-    [TD_CTRL_CAPS] = ACTION_TAP_DANCE_DOUBLE(KC_LCTRL, KC_CAPS),
+    [TD_CTRL_ESC] = ACTION_TAP_DANCE_DOUBLE(KC_LCTRL, KC_ESC),
     // reset to flash tap 3 times to activate 
     [TD_RESET] = ACTION_TAP_DANCE_FN(safe_reset),
+    [TD_UNDERGLOW] = ACTION_TAP_DANCE_FN(tap_rgb),
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -56,11 +69,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * `-----------------------------------------------------------------------------------'
  */
 [_QWERTY] = LAYOUT( \
-  KC_ESC,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_BSPC, \
+  KC_ESC,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    TD(TD_UNDERGLOW), \
   KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_BSLASH, \
-  TD(TD_CTRL_CAPS), KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT, \
+  TD(TD_CTRL_ESC), KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT, \
   KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_ENT , \
-  ADJUST,  KC_LCTL, KC_LGUI, KC_LALT, LOWER,   KC_SPC,  KC_SPC,  RAISE,   KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT \
+  ADJUST,  KC_LCTL, KC_LGUI, KC_LALT, LOWER,   KC_BSPC, KC_SPC,  RAISE,   KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT \
 ),
 
 
@@ -180,3 +193,30 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   }
   return true;
 }
+
+#ifdef RGBLIGHT_ENABLE
+void keyboard_post_init_user(void) {
+    rgblight_enable_noeeprom(); // Enables RGB, without saving settings
+    rgblight_sethsv_noeeprom(HSV_WHITE);
+    rgblight_mode_noeeprom(RGBLIGHT_MODE_STATIC_LIGHT);
+}
+
+
+layer_state_t layer_state_set_user(layer_state_t state) {
+    switch (get_highest_layer(state)) {
+        case _RAISE:
+            rgblight_sethsv_noeeprom(HSV_RED);
+            break;
+        case _LOWER:
+            rgblight_sethsv_noeeprom(HSV_BLUE);
+            break;
+        case _ADJUST:
+            rgblight_sethsv_noeeprom(HSV_PURPLE);
+            break;
+        case _QWERTY:
+            rgblight_sethsv_noeeprom(HSV_WHITE);
+            break;
+    }
+    return state;
+}
+#endif
