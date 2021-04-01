@@ -196,7 +196,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case KC_CAPS:
       if (record->event.pressed) {
           caps = !caps;
-          if (caps) rgblight_sethsv_noeeprom(HSV_ORANGE); 
       }
       break;
     case SHIFT_ENTER:
