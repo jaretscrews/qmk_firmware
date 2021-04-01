@@ -18,6 +18,7 @@
 #define _RAISE 2
 #define _ADJUST 16
 
+bool caps = false;
 
 enum custom_keycodes {
   QWERTY = SAFE_RANGE,
@@ -190,6 +191,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       }
       return false;
       break;
+    case KC_CAPS:
+      if (record->event.pressed) {
+          caps = !caps;
+          if (caps) rgblight_sethsv_noeeprom(HSV_PINK); 
+      }
+      break;
   }
   return true;
 }
@@ -214,7 +221,8 @@ layer_state_t layer_state_set_user(layer_state_t state) {
             rgblight_sethsv_noeeprom(HSV_PURPLE);
             break;
         case _QWERTY:
-            rgblight_sethsv_noeeprom(HSV_WHITE);
+            if (caps) rgblight_sethsv_noeeprom(HSV_PINK); 
+            else rgblight_sethsv_noeeprom(HSV_WHITE);
             break;
     }
     return state;
