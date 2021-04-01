@@ -155,6 +155,8 @@ void persistent_default_layer_set(uint16_t default_layer) {
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   static uint16_t shift_timer;
+  static bool shiftOn = false;
+  static bool shiftUsed = false;
   switch (keycode) {
     case QWERTY:
       if (record->event.pressed) {
@@ -201,14 +203,20 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case SHIFT_ENTER:
       if(record->event.pressed) {
           shift_timer = timer_read();
+          shiftOn = true;
           register_code(KC_LSHIFT);
       } else {
           unregister_code(KC_LSHIFT);
-          if (timer_elapsed(shift_timer) < TAPPING_TERM) {
+          if (timer_elapsed(shift_timer) < TAPPING_TERM && !shiftUsed) {
               send_string(SS_TAP(X_ENTER));
           }
+          shiftOn = false;
+          shiftUsed = false;
       }
       return false;
+      break;
+    default:
+      if (shiftOn && record->event.pressed) shiftUsed = true;
       break;
   }
   return true;
